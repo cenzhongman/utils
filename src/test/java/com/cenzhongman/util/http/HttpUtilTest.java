@@ -1,5 +1,6 @@
 package com.cenzhongman.util.http;
 
+import org.apache.http.HttpHost;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,12 +15,17 @@ class HttpUtilTest {
     @Test
     void get() {
         // 普通get
-        System.out.println(HttpUtil.doGet("http://www.cnblogs.com/digdeep/p/5580959.html"));
+        // 更换IP
+        String ip = HttpUtil.doGet("http://123.207.35.36:5010/get");
+        String hostName = ip.split(":")[0];
+        int port = Integer.parseInt(ip.split(":")[1]);
 
-        // 带参数的get(将会对参数进行URL编码)
-        Map<String, String> params = new HashMap<>();
-        params.put("query", "SELECT DISTINCT ?s ?p ?o { ?s ?p ?o } LIMIT 25");
-        System.out.println(HttpUtil.doGet("http://datainsights.biz:9394/company_info/", params));
+        System.out.println(HttpUtil.doGet("http://www.cnblogs.com/digdeep/p/5580959.html",new HttpHost(hostName, port)));
+
+//        // 带参数的get(将会对参数进行URL编码)
+//        Map<String, String> params = new HashMap<>();
+//        params.put("query", "SELECT DISTINCT ?s ?p ?o { ?s ?p ?o } LIMIT 25");
+//        System.out.println(HttpUtil.doGet("http://datainsights.biz:9394/company_info/", params));
     }
 
     @Test

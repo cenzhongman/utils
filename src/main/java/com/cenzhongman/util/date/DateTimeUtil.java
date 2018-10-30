@@ -33,6 +33,13 @@ public class DateTimeUtil {
         DEFAULT_CHAR_MAP.put(6, 's');
     }
 
+    /**
+     * 注意：不支持同时有多个时间的格式
+     *
+     * @param dateStr
+     * @return
+     * @throws ParseException
+     */
     public static Date toDate(String dateStr) throws ParseException {
         return (Date) toDateWithSource(dateStr).get("date");
     }
@@ -51,8 +58,8 @@ public class DateTimeUtil {
         String rstSource = null;
 
         // 去掉除了月份和数字以外的末尾信息
-        if (!RegexUtil.isMatch(dateStr, "(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)"
-        ) || RegexUtil.extract(dateStr, "\\d").size() > 4) {
+        if (!RegexUtil.isMatch(dateStr, "(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)")
+                || RegexUtil.extract(dateStr, "\\d").size() > 4) {
             dateStr = dateStr.replaceAll("([^年|^月|^日|^时|^分|^秒|^0-9])*$", "");
         }
 

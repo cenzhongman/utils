@@ -1,8 +1,6 @@
 package com.cenzhongman.util.http;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -18,6 +16,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.Proxy;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -27,28 +26,22 @@ import java.util.*;
  */
 public class HttpUtil {
     private static final String DEFAULT_CHARSET = "UTF-8";
-    /**
-     * 设置配置请求参数
-     */
-    private static RequestConfig requestConfig = RequestConfig.custom()
-            // 连接主机服务超时时间
-            .setConnectTimeout(35000)
-            // 请求超时时间
-            .setConnectionRequestTimeout(35000)
-            // 数据读取超时时间
-            .setSocketTimeout(60000)
-            .build();
 
-    /**
-     * 普通Http请求
-     *
-     * @param url url
-     * @return 请求结果
-     */
     public static String doGet(String url) {
+        Header[] headers = {};
+        return doGet(url,headers);
+    }
+
+        /**
+         * 普通Http请求
+         *
+         * @param url url
+         * @return 请求结果
+         */
+    public static String doGet(String url,HttpHost proxy) {
         // 添加头
         Header[] headers = {};
-        return doGet(url, headers);
+        return doGet(url, headers,proxy);
     }
 
     /**
@@ -80,17 +73,32 @@ public class HttpUtil {
         return doGet(url, headers);
     }
 
-    /**
-     * 支持参数编码的get请求
-     *
-     * @param url 请求的URL
-     * @param headers 请求头
-     * @return 请求结果
-     */
-    private static String doGet(String url, Header[] headers) {
+    public static String doGet(String url, Header[] headers) {
+        return doGet(url,headers,null);
+    }
+
+        /**
+         * 支持参数编码的get请求
+         *
+         * @param url 请求的URL
+         * @param headers 请求头
+         * @return 请求结果
+         */
+    public static String doGet(String url, Header[] headers, HttpHost proxy) {
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
-        String result = "";
+        String result = null;
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                // 连接主机服务超时时间
+                .setConnectTimeout(35000)
+                // 请求超时时间
+                .setConnectionRequestTimeout(35000)
+                // 数据读取超时时间
+                .setSocketTimeout(60000)
+                .setProxy(proxy)
+                .build();
+
         try {
             // 通过址默认配置创建一个httpClient实例
             httpClient = HttpClients.createDefault();
@@ -105,11 +113,15 @@ public class HttpUtil {
             // 通过返回对象获取返回数据
             HttpEntity entity = response.getEntity();
             // 通过EntityUtils中的toString方法将结果转换为字符串
-            result = EntityUtils.toString(entity,DEFAULT_CHARSET);
+
+            if (response.getStatusLine().getStatusCode() == 200){
+                result = EntityUtils.toString(entity,DEFAULT_CHARSET);
+            }
+
         } catch (ClientProtocolException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         } finally {
             // 关闭资源
             if (null != response) {
@@ -207,18 +219,34 @@ public class HttpUtil {
         return result;
     }
 
-    /**
-     * 最终的Post实现
-     *
-     * @param url     url
-     * @param entity  请求实体
-     * @param headers 请求头
-     * @return 请求结果
-     */
     private static String doPost(String url, HttpEntity entity, Header[] headers) {
+        return doPost(url,entity,headers,null);
+    }
+
+
+        /**
+         * 最终的Post实现
+         *
+         * @param url     url
+         * @param entity  请求实体
+         * @param headers 请求头
+         * @return 请求结果
+         */
+    private static String doPost(String url, HttpEntity entity, Header[] headers,HttpHost proxy) {
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse httpResponse = null;
         String result = "";
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                // 连接主机服务超时时间
+                .setConnectTimeout(35000)
+                // 请求超时时间
+                .setConnectionRequestTimeout(35000)
+                // 数据读取超时时间
+                .setSocketTimeout(60000)
+                .setProxy(proxy)
+                .build();
+
         // 创建httpClient实例
         httpClient = HttpClients.createDefault();
         // 创建httpPost远程连接实例
