@@ -47,8 +47,17 @@ public class FileUtil {
         return lineList;
     }
 
+
     public static List<String> readLines(InputStream in) {
         return readLines(in, StandardCharsets.UTF_8);
+    }
+
+    public static List<String> readLines(File file) throws FileNotFoundException {
+        return readLines(new FileInputStream(file));
+    }
+
+    public static List<String> readLines(File file,Charset charset) throws FileNotFoundException {
+        return readLines(new FileInputStream(file),charset);
     }
 
     public static List<String> readLines(String path, Charset charset) throws FileNotFoundException {
@@ -73,12 +82,24 @@ public class FileUtil {
         return read(in, StandardCharsets.UTF_8);
     }
 
+    public static String read(InputStream in,Character character) {
+        return read(in, character);
+    }
+
     public static String read(String path, Charset charset) throws FileNotFoundException {
         return read(new FileInputStream(new File(path)), charset);
     }
 
     public static String read(String path) throws FileNotFoundException {
         return read(path, StandardCharsets.UTF_8);
+    }
+
+    public static String read(File file) throws FileNotFoundException {
+        return read(new FileInputStream(file), StandardCharsets.UTF_8);
+    }
+
+    public static String read(File file,Character character) throws FileNotFoundException {
+        return read(new FileInputStream(file), character);
     }
 
     // 写
