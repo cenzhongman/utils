@@ -56,8 +56,8 @@ public class FileUtil {
         return readLines(new FileInputStream(file));
     }
 
-    public static List<String> readLines(File file,Charset charset) throws FileNotFoundException {
-        return readLines(new FileInputStream(file),charset);
+    public static List<String> readLines(File file, Charset charset) throws FileNotFoundException {
+        return readLines(new FileInputStream(file), charset);
     }
 
     public static List<String> readLines(String path, Charset charset) throws FileNotFoundException {
@@ -82,7 +82,7 @@ public class FileUtil {
         return read(in, StandardCharsets.UTF_8);
     }
 
-    public static String read(InputStream in,Character character) {
+    public static String read(InputStream in, Character character) {
         return read(in, character);
     }
 
@@ -98,7 +98,7 @@ public class FileUtil {
         return read(new FileInputStream(file), StandardCharsets.UTF_8);
     }
 
-    public static String read(File file,Character character) throws FileNotFoundException {
+    public static String read(File file, Character character) throws FileNotFoundException {
         return read(new FileInputStream(file), character);
     }
 
@@ -215,5 +215,17 @@ public class FileUtil {
 
     public static boolean mkdirs(File file) {
         return file.mkdirs();
+    }
+
+    // 复制文件
+    public static void copy(String srcPath, String dstPath) throws IOException {
+        InputStream in = new FileInputStream(srcPath);
+        OutputStream out = new FileOutputStream(dstPath);
+        byte[] date = new byte[512];
+        while (in.read(date) > 0) {
+            out.write(date);
+        }
+        in.close();
+        out.close();
     }
 }
