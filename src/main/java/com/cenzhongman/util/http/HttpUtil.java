@@ -14,13 +14,12 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.Proxy;
-import java.net.URLEncoder;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * @author 岑忠满
@@ -31,25 +30,25 @@ public class HttpUtil {
 
     public static String doGet(String url) {
         Header[] headers = {};
-        return doGet(url,headers);
+        return doGet(url, headers);
     }
 
-        /**
-         * 普通Http请求
-         *
-         * @param url url
-         * @return 请求结果
-         */
-    public static String doGet(String url,HttpHost proxy) {
+    /**
+     * 普通Http请求
+     *
+     * @param url url
+     * @return 请求结果
+     */
+    public static String doGet(String url, HttpHost proxy) {
         // 添加头
         Header[] headers = {};
-        return doGet(url, headers,proxy);
+        return doGet(url, headers, proxy);
     }
 
     /**
      * 支持参数编码的get请求
      *
-     * @param url 基本URL
+     * @param url    基本URL
      * @param params 参数列表
      * @return 请求结果
      */
@@ -61,7 +60,7 @@ public class HttpUtil {
         // 将params转为headers
         for (String k : params.keySet()) {
             try {
-                String value = URLEncoder.encode(params.get(k),DEFAULT_CHARSET);
+                String value = URLEncoder.encode(params.get(k), DEFAULT_CHARSET);
                 if (!url.contains("?")) {
                     sb.append("?").append(k).append("=").append(value);
                 } else {
@@ -76,16 +75,16 @@ public class HttpUtil {
     }
 
     public static String doGet(String url, Header[] headers) {
-        return doGet(url,headers,null);
+        return doGet(url, headers, null);
     }
 
-        /**
-         * 支持参数编码的get请求
-         *
-         * @param url 请求的URL
-         * @param headers 请求头
-         * @return 请求结果
-         */
+    /**
+     * 支持参数编码的get请求
+     *
+     * @param url     请求的URL
+     * @param headers 请求头
+     * @return 请求结果
+     */
     public static String doGet(String url, Header[] headers, HttpHost proxy) {
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse response = null;
@@ -116,8 +115,8 @@ public class HttpUtil {
             HttpEntity entity = response.getEntity();
             // 通过EntityUtils中的toString方法将结果转换为字符串
 
-            if (response.getStatusLine().getStatusCode() == 200){
-                result = EntityUtils.toString(entity,DEFAULT_CHARSET);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                result = EntityUtils.toString(entity, DEFAULT_CHARSET);
             }
 
         } catch (ClientProtocolException e) {
@@ -147,7 +146,7 @@ public class HttpUtil {
     /**
      * Post请求
      *
-     * @param url 请求的URL
+     * @param url      请求的URL
      * @param paramMap 请求的参数
      * @return 请求结果
      */
@@ -160,9 +159,9 @@ public class HttpUtil {
     /**
      * 带请求头的Post请求
      *
-     * @param url 请求的URL
+     * @param url      请求的URL
      * @param paramMap 请求的参数
-     * @param headers 请求头
+     * @param headers  请求头
      * @return 请求结果
      */
     public static String doPost(String url, Map<String, String> paramMap, Header[] headers) {
@@ -192,7 +191,7 @@ public class HttpUtil {
     /**
      * Post请求
      *
-     * @param url 请求的URL
+     * @param url  请求的URL
      * @param json 请求的Json
      * @return 请求结果
      */
@@ -205,32 +204,32 @@ public class HttpUtil {
     /**
      * 带请求头的Post请求
      *
-     * @param url 请求的URL
-     * @param json 请求的Json
+     * @param url     请求的URL
+     * @param json    请求的Json
      * @param headers 请求头
      * @return 请求结果
      */
     public static String doPost(String url, String json, Header[] headers) {
         String result = "";
-        HttpEntity entity = new StringEntity(json,DEFAULT_CHARSET);
+        HttpEntity entity = new StringEntity(json, DEFAULT_CHARSET);
         result = doPost(url, entity, headers);
         return result;
     }
 
     private static String doPost(String url, HttpEntity entity, Header[] headers) {
-        return doPost(url,entity,headers,null);
+        return doPost(url, entity, headers, null);
     }
 
 
-        /**
-         * 最终的Post实现
-         *
-         * @param url     url
-         * @param entity  请求实体
-         * @param headers 请求头
-         * @return 请求结果
-         */
-    private static String doPost(String url, HttpEntity entity, Header[] headers,HttpHost proxy) {
+    /**
+     * 最终的Post实现
+     *
+     * @param url     url
+     * @param entity  请求实体
+     * @param headers 请求头
+     * @return 请求结果
+     */
+    private static String doPost(String url, HttpEntity entity, Header[] headers, HttpHost proxy) {
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse httpResponse = null;
         String result = "";
@@ -259,7 +258,7 @@ public class HttpUtil {
             httpResponse = httpClient.execute(httpPost);
             // 从响应对象中获取响应内容
             HttpEntity responseEntity = httpResponse.getEntity();
-            result = EntityUtils.toString(responseEntity,DEFAULT_CHARSET);
+            result = EntityUtils.toString(responseEntity, DEFAULT_CHARSET);
         } catch (ClientProtocolException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -282,5 +281,37 @@ public class HttpUtil {
             }
         }
         return result;
+    }
+
+    /**
+     * 下载文件或图片
+     *
+     * @param urlString
+     */
+    public static void download(String urlString, String imageName) {
+        URL url;
+
+        try {
+            url = new URL(urlString);
+            DataInputStream dataInputStream = new DataInputStream(url.openStream());
+
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(imageName));
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = dataInputStream.read(buffer)) > 0) {
+                output.write(buffer, 0, length);
+            }
+            byte[] context=output.toByteArray();
+            fileOutputStream.write(output.toByteArray());
+            dataInputStream.close();
+            fileOutputStream.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
