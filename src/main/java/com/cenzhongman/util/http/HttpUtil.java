@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.Proxy;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -210,12 +212,8 @@ public class HttpUtil {
      */
     public static String doPost(String url, String json, Header[] headers) {
         String result = "";
-        try {
-            HttpEntity entity = new StringEntity(json);
-            result = doPost(url, entity, headers);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        HttpEntity entity = new StringEntity(json,DEFAULT_CHARSET);
+        result = doPost(url, entity, headers);
         return result;
     }
 
