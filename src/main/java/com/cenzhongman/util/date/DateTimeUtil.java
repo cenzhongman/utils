@@ -34,11 +34,60 @@ public class DateTimeUtil {
     }
 
     /**
+     * 使用yyyy-MM-dd HH:mm:ss格式化时间
+     *
+     * @param date   时间
+     * @param format 时间格式
+     * @return yyyy-MM-dd HH:mm:ss标准时间
+     */
+    public static String format(Date date, String format) {
+        SimpleDateFormat simpleDateFormat = format.isEmpty() ? new SimpleDateFormat(DEFAULT_FORMAT) : new SimpleDateFormat(format);
+        return simpleDateFormat.format(date);
+    }
+
+    /**
+     * 使用yyyy-MM-dd HH:mm:ss格式化时间
+     *
+     * @param date 时间
+     * @return yyyy-MM-dd HH:mm:ss标准时间
+     */
+    public static String format(Date date) {
+        return format(date, DEFAULT_FORMAT);
+    }
+
+    /**
+     * 将String转成Date
+     *
+     * @param dateStr 时间字符串
+     * @param format  格式
+     * @return Date
+     * @throws ParseException 解析异常
+     */
+    public static Date toDate(String dateStr, String format) throws ParseException {
+        SimpleDateFormat sf = new SimpleDateFormat(format);
+        return sf.parse(dateStr);
+    }
+
+    /**
+     * 将String转成Date
+     *
+     * @param dateStr 时间字符串
+     * @param format  格式
+     * @param locale  枚举类型
+     * @return Date
+     * @throws ParseException 解析异常
+     */
+    public static Date toDate(String dateStr, String format, Locale locale) throws ParseException {
+        SimpleDateFormat sf = new SimpleDateFormat(format, locale);
+        return sf.parse(dateStr);
+    }
+
+    /**
      * 注意：不支持同时有多个时间的格式
      *
-     * @param dateStr
-     * @return
-     * @throws ParseException
+     * @param dateStr 含有时间的String
+     * @return 标准时间格式
+     * @throws ParseException 时间格式不支持
      */
     public static Date toDate(String dateStr) throws ParseException {
         return (Date) toDateWithSource(dateStr).get("date");
@@ -146,6 +195,7 @@ public class DateTimeUtil {
             return rstMap;
         }
 
+        // 12 Jan
         String re4 = "(\\d{1,2})\\D+(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)";
         if (RegexUtil.isMatch(dateStr, re4)) {
             String dateStr1 = RegexUtil.extractFirst(dateStr, re4);
@@ -157,6 +207,7 @@ public class DateTimeUtil {
             return rstMap;
         }
 
+        // Jan 1
         String re5 = "(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)\\D+(\\d{1,2})";
         if (RegexUtil.isMatch(dateStr, re5)) {
             String dateStr1 = RegexUtil.extractFirst(dateStr, re5);
@@ -168,6 +219,7 @@ public class DateTimeUtil {
             return rstMap;
         }
 
+        // 12月12日
         String re6 = "\\d{1,2}月\\d{1,2}日";
         if (RegexUtil.isMatch(dateStr, re6)) {
             String dateStr1 = RegexUtil.extractFirst(dateStr, re6);
@@ -202,36 +254,11 @@ public class DateTimeUtil {
     }
 
 
-    public static Date toDate(String dateStr, String regex, Map<Integer, Character> characterMap) throws ParseException {
+    private static Date toDate(String dateStr, String regex, Map<Integer, Character> characterMap) throws ParseException {
         return toDate(dateStr, regex, characterMap, Locale.CHINA);
     }
 
-    /**
-     * 将String转成Date
-     *
-     * @param dateStr 时间字符串
-     * @param format  格式
-     * @return Date
-     * @throws ParseException 解析异常
-     */
-    public static Date toDate(String dateStr, String format) throws ParseException {
-        SimpleDateFormat sf = new SimpleDateFormat(format);
-        return sf.parse(dateStr);
-    }
 
-    /**
-     * 将String转成Date
-     *
-     * @param dateStr 时间字符串
-     * @param format  格式
-     * @param locale  枚举类型
-     * @return Date
-     * @throws ParseException 解析异常
-     */
-    public static Date toDate(String dateStr, String format, Locale locale) throws ParseException {
-        SimpleDateFormat sf = new SimpleDateFormat(format, locale);
-        return sf.parse(dateStr);
-    }
 
     private static String replaceEachChar(String s, Character c) {
         StringBuilder sb = new StringBuilder();
@@ -241,27 +268,5 @@ public class DateTimeUtil {
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * 使用yyyy-MM-dd HH:mm:ss格式化时间
-     *
-     * @param date   时间
-     * @param format 时间格式
-     * @return yyyy-MM-dd HH:mm:ss标准时间
-     */
-    public static String format(Date date, String format) {
-        SimpleDateFormat simpleDateFormat = format.isEmpty() ? new SimpleDateFormat(DEFAULT_FORMAT) : new SimpleDateFormat(format);
-        return simpleDateFormat.format(date);
-    }
-
-    /**
-     * 使用yyyy-MM-dd HH:mm:ss格式化时间
-     *
-     * @param date 时间
-     * @return yyyy-MM-dd HH:mm:ss标准时间
-     */
-    public static String format(Date date) {
-        return format(date, DEFAULT_FORMAT);
     }
 }

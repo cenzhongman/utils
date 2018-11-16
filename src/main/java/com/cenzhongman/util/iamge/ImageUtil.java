@@ -1,25 +1,16 @@
 package com.cenzhongman.util.iamge;
 
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-
-import com.cenzhongman.util.file.FileUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.Arrays;
 
 /**
  * <p>Title: ImageUtil </p>
@@ -30,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @date 2014年10月28日 上午10:24:26
  */
 public class ImageUtil {
-    private static Logger log = LoggerFactory.getLogger(ImageUtil.class);
+    private static Logger logger = Logger.getLogger(ImageUtil.class);
 
     private static String DEFAULT_THUMB_PREVFIX = "thumb_";
     private static String DEFAULT_CUT_PREVFIX = "cut_";
@@ -59,7 +50,7 @@ public class ImageUtil {
                     suffix = srcImg.getName().substring(srcImg.getName().lastIndexOf(".") + 1);
                 }// 类型和图片后缀全部小写，然后判断后缀是否合法
                 if (suffix == null || !types.toLowerCase().contains(suffix.toLowerCase() + ",")) {
-                    log.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
+                    logger.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
                     return;
                 }
                 // 将FileInputStream 转换为ImageInputStream
@@ -88,14 +79,30 @@ public class ImageUtil {
                 }
             }
         } else {
-            log.warn("the src image is not exist.");
+            logger.warn("the src image is not exist.");
         }
     }
 
-    public static void cutImage(File srcImg, OutputStream output, int x, int y, int width, int height) {
-        cutImage(srcImg, output, new java.awt.Rectangle(x, y, width, height));
+    /**
+     * <p>Title: cutImage</p>
+     * <p>Description:  根据原图与裁切size截取局部图片</p>
+     *
+     * @param srcImg 源图片
+     * @param output 图片输出流
+     * @param x,y,w,h   需要截取部分的坐标和大小
+     */
+    public static void cutImage(File srcImg, OutputStream output, int x, int y, int w, int h) {
+        cutImage(srcImg, output, new java.awt.Rectangle(x, y, w, h));
     }
 
+    /**
+     * <p>Title: cutImage</p>
+     * <p>Description:  根据原图与裁切size截取局部图片</p>
+     *
+     * @param srcImg 源图片
+     * @param destImgPath 图片输出路径
+     * @param rect   需要截取部分的坐标和大小
+     */
     public static void cutImage(File srcImg, String destImgPath, java.awt.Rectangle rect) {
         File destImg = new File(destImgPath);
         String saveImg;
@@ -106,11 +113,11 @@ public class ImageUtil {
             try {
                 if (!destImg.isDirectory()) {
                     p = destImg.getParent();
-                    if (!new File(p).exists()){
+                    if (!new File(p).exists()) {
                         new File(p).mkdirs();
                     }
                     saveImg = destImg.getAbsolutePath();
-                }else {
+                } else {
                     saveImg = p + DEFAULT_CUT_PREVFIX + srcImg.getName();
                 }
                 if (!p.endsWith(File.separator)) {
@@ -118,16 +125,24 @@ public class ImageUtil {
                 }
                 cutImage(srcImg, new java.io.FileOutputStream(saveImg), rect);
             } catch (FileNotFoundException e) {
-                log.warn("the dest image is not exist.");
+                logger.warn("the dest image is not exist.");
             }
         } else {
-            log.warn("the dest image folder is not exist.");
+            logger.warn("the dest image folder is not exist.");
             destImg.mkdirs();
         }
     }
 
-    public static void cutImage(File srcImg, String destImg, int x, int y, int width, int height) {
-        cutImage(srcImg, destImg, new java.awt.Rectangle(x, y, width, height));
+    /**
+     * <p>Title: cutImage</p>
+     * <p>Description:  根据原图与裁切size截取局部图片</p>
+     *
+     * @param srcImg 源图片
+     * @param destImgPath 图片输出路径
+     * @param x,y,w,h   需要截取部分的坐标和大小
+     */
+    public static void cutImage(File srcImg, String destImgPath, int x, int y, int w, int h) {
+        cutImage(srcImg, destImgPath, new java.awt.Rectangle(x, y, w, h));
     }
 
     public static void cutImage(String srcImg, String destImg, int x, int y, int width, int height) {
@@ -139,6 +154,7 @@ public class ImageUtil {
      * <p>Description: 根据图片路径生成缩略图 </p>
      *
      * @param srcImg  原图片路径
+     * @param output  图片输出流
      * @param w       缩略图宽
      * @param h       缩略图高
      * @param prevfix 生成缩略图的前缀
@@ -155,10 +171,9 @@ public class ImageUtil {
                     suffix = srcImg.getName().substring(srcImg.getName().lastIndexOf(".") + 1);
                 }// 类型和图片后缀全部小写，然后判断后缀是否合法
                 if (suffix == null || !types.toLowerCase().contains(suffix.toLowerCase() + ",")) {
-                    log.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
+                    logger.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
                     return;
                 }
-                log.debug("target image's size, width:{}, height:{}.", w, h);
                 Image img = ImageIO.read(srcImg);
                 // 根据原图与要求的缩略图比例，找到最合适的缩略图比例
                 if (!force) {
@@ -167,12 +182,10 @@ public class ImageUtil {
                     if ((width * 1.0) / w < (height * 1.0) / h) {
                         if (width > w) {
                             h = Integer.parseInt(new java.text.DecimalFormat("0").format(height * w / (width * 1.0)));
-                            log.debug("change image's height, width:{}, height:{}.", w, h);
                         }
                     } else {
                         if (height > h) {
                             w = Integer.parseInt(new java.text.DecimalFormat("0").format(width * h / (height * 1.0)));
-                            log.debug("change image's width, width:{}, height:{}.", w, h);
                         }
                     }
                 }
@@ -184,13 +197,23 @@ public class ImageUtil {
                 ImageIO.write(bi, suffix, output);
                 output.close();
             } catch (IOException e) {
-                log.error("generate thumbnail image failed.", e);
+                logger.error("generate thumbnail image failed.", e);
             }
         } else {
-            log.warn("the src image is not exist.");
+            logger.warn("the src image is not exist.");
         }
     }
 
+    /**
+     * <p>Title: thumbnailImage</p>
+     * <p>Description: 根据图片路径生成缩略图 </p>
+     *
+     * @param srcImg  原图片路径
+     * @param w       缩略图宽
+     * @param h       缩略图高
+     * @param prevfix 生成缩略图的前缀
+     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     */
     public static void thumbnailImage(File srcImg, int w, int h, String prevfix, boolean force) {
         String p = srcImg.getAbsolutePath();
         try {
@@ -202,19 +225,46 @@ public class ImageUtil {
             }
             thumbnailImage(srcImg, new java.io.FileOutputStream(p + prevfix + srcImg.getName()), w, h, prevfix, force);
         } catch (FileNotFoundException e) {
-            log.error("the dest image is not exist.", e);
+            logger.error("the dest image is not exist.", e);
         }
     }
 
+    /**
+     * <p>Title: thumbnailImage</p>
+     * <p>Description: 根据图片路径生成缩略图 </p>
+     *
+     * @param imagePath  原图片路径
+     * @param w       缩略图宽
+     * @param h       缩略图高
+     * @param prevfix 生成缩略图的前缀
+     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     */
     public static void thumbnailImage(String imagePath, int w, int h, String prevfix, boolean force) {
         File srcImg = new File(imagePath);
         thumbnailImage(srcImg, w, h, prevfix, force);
     }
 
+    /**
+     * <p>Title: thumbnailImage</p>
+     * <p>Description: 根据图片路径生成缩略图 </p>
+     *
+     * @param imagePath  原图片路径
+     * @param w       缩略图宽
+     * @param h       缩略图高
+     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     */
     public static void thumbnailImage(String imagePath, int w, int h, boolean force) {
         thumbnailImage(imagePath, w, h, DEFAULT_THUMB_PREVFIX, DEFAULT_FORCE);
     }
 
+    /**
+     * <p>Title: thumbnailImage</p>
+     * <p>Description: 根据图片路径生成缩略图 </p>
+     *
+     * @param imagePath  原图片路径
+     * @param w       缩略图宽
+     * @param h       缩略图高
+     */
     public static void thumbnailImage(String imagePath, int w, int h) {
         thumbnailImage(imagePath, w, h, DEFAULT_FORCE);
     }

@@ -29,12 +29,6 @@ public class FileUtilTest {
     void read() {
         System.out.println(FileUtil.read(this.getClass().getResourceAsStream("/FileUtilTest.txt")));
         System.out.println(FileUtil.read(this.getClass().getResourceAsStream("/FileUtilTest.txt"), StandardCharsets.UTF_8));
-        try {
-            System.out.println(FileUtil.read("C:\\Users\\34566\\OneDrive\\program\\utils\\src\\test\\resources\\FileUtilTest.txt"));
-            System.out.println(FileUtil.read("C:\\Users\\34566\\OneDrive\\program\\utils\\src\\test\\resources\\FileUtilTest.txt",StandardCharsets.UTF_8));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -46,5 +40,16 @@ public class FileUtilTest {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void getName(){
+        System.out.println(FileUtil.getName("C:\\Users\\34566\\OneDrive\\program\\utils\\src\\test\\resources\\"));
+        System.out.println(FileUtil.getNameWithOutType("C:\\Users\\34566\\OneDrive\\program\\utils\\src\\test\\resources\\123.txt"));
+    }
+
+    @Test
+    void listFile(){
+        System.out.println(FileUtil.listFiles("C:\\Users\\34566\\OneDrive\\program\\utils\\src\\test\\resources\\FileUtilTest.txt"));
     }
 }

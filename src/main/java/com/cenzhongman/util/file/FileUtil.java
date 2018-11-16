@@ -1,15 +1,19 @@
 package com.cenzhongman.util.file;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * 文件工具类，支持读写文件、重命名、删除等，不一定是为了工具，不会写可以看这里的
+ * 文件工具类，支持读写文件、重命名、删除等
  *
  * @author 岑忠满
  * @date 2018/9/25 14:09
@@ -17,7 +21,13 @@ import java.util.List;
 public class FileUtil {
     private static Logger logger = Logger.getLogger(FileUtil.class);
 
-    // 读
+    /**
+     * 指定格式读取文件
+     *
+     * @param in      输入流
+     * @param charset 文件编码
+     * @return 文件的行
+     */
     public static List<String> readLines(InputStream in, Charset charset) {
         List<String> lineList = new ArrayList<>();
 
@@ -47,62 +57,137 @@ public class FileUtil {
         return lineList;
     }
 
-
+    /**
+     * 读取文件
+     *
+     * @param in 输入流
+     * @return 文件的所有行
+     */
     public static List<String> readLines(InputStream in) {
         return readLines(in, StandardCharsets.UTF_8);
     }
 
+    /**
+     * 读取文件
+     *
+     * @param file 文件
+     * @return 文件的行
+     */
     public static List<String> readLines(File file) throws FileNotFoundException {
         return readLines(new FileInputStream(file));
     }
 
+    /**
+     * 指定格式读取文件
+     *
+     * @param file    文件
+     * @param charset 文件编码
+     * @return 文件的行
+     */
     public static List<String> readLines(File file, Charset charset) throws FileNotFoundException {
         return readLines(new FileInputStream(file), charset);
     }
 
+    /**
+     * 指定格式读取文件
+     *
+     * @param path    文件路径
+     * @param charset 文件编码
+     * @return 文件的行
+     */
     public static List<String> readLines(String path, Charset charset) throws FileNotFoundException {
         return readLines(new FileInputStream(new File(path)), charset);
     }
 
+    /**
+     * 读取文件
+     *
+     * @param path 文件路径
+     * @return 文件的行
+     */
     public static List<String> readLines(String path) throws FileNotFoundException {
         return readLines(new FileInputStream(new File(path)));
     }
 
+    /**
+     * 读取文件
+     *
+     * @param in      输入流
+     * @param charset 文件编码
+     * @return 文件的内容
+     */
     public static String read(InputStream in, Charset charset) {
-        StringBuilder sb = new StringBuilder();
-        List<String> lines = readLines(in, charset);
-        for (String line : lines) {
-            sb.append(line);
-            sb.append("\n");
+        StringBuilder stringBuilder = new StringBuilder();
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, charset));
+        try {
+            int value;
+            while ((value = bufferedReader.read()) != -1) {
+                stringBuilder.append((char) value);
+            }
+        } catch (IOException ignored) {
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
 
+    /**
+     * 读取文件
+     *
+     * @param in 输入流
+     * @return 文件的内容
+     */
     public static String read(InputStream in) {
         return read(in, StandardCharsets.UTF_8);
     }
 
-    public static String read(InputStream in, Character character) {
-        return read(in, character);
-    }
-
+    /**
+     * 读取文件
+     *
+     * @param path    文件路径
+     * @param charset 文件编码
+     * @return 文件的内容
+     */
     public static String read(String path, Charset charset) throws FileNotFoundException {
         return read(new FileInputStream(new File(path)), charset);
     }
 
+    /**
+     * 读取文件
+     *
+     * @param path 文件路径
+     * @return 文件的内容
+     */
     public static String read(String path) throws FileNotFoundException {
         return read(path, StandardCharsets.UTF_8);
     }
 
+    /**
+     * 读取文件
+     *
+     * @param file 文件
+     * @return 文件的内容
+     */
     public static String read(File file) throws FileNotFoundException {
         return read(new FileInputStream(file), StandardCharsets.UTF_8);
     }
 
-    public static String read(File file, Character character) throws FileNotFoundException {
-        return read(new FileInputStream(file), character);
+    /**
+     * 读取文件
+     *
+     * @param file    文件
+     * @param charset 文件编码
+     * @return 文件的内容
+     */
+    public static String read(File file, Charset charset) throws FileNotFoundException {
+        return read(new FileInputStream(file), charset);
     }
 
-    // 写
+    /**
+     * 写入文件
+     *
+     * @param out     输入流
+     * @param content 内容
+     * @param charset 编码
+     */
     private static void write(OutputStream out, String content, Charset charset) {
         BufferedWriter bufferedWriter;
         bufferedWriter = new BufferedWriter(new OutputStreamWriter(out, charset));
@@ -120,6 +205,13 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 写入文件
+     *
+     * @param path    写出的路径，若不存在则自动创建
+     * @param content 内容
+     * @param charset 编码
+     */
     public static void write(String path, String content, Charset charset, Boolean appEnd) throws FileNotFoundException {
         // 文件夹不存在时创建文件夹，然后再写
         String dirPath = path.replaceAll("[^/\\\\]+$", "");
@@ -136,96 +228,299 @@ public class FileUtil {
 
     }
 
+    /**
+     * 写入文件
+     *
+     * @param path    写出的路径，若不存在则自动创建
+     * @param content 内容
+     * @param charset 编码
+     */
     public static void write(String path, String content, Charset charset) throws FileNotFoundException {
         write(path, content, charset, false);
     }
 
+    /**
+     * 写入文件
+     *
+     * @param path    写出的路径，若不存在则自动创建
+     * @param content 内容
+     */
     public static void write(String path, String content) throws FileNotFoundException {
         write(path, content, StandardCharsets.UTF_8, false);
     }
 
-    // listFiles
-    public static File[] listFiles(File file) {
-        File[] files = new File[0];
+    /**
+     * 列举当前文件夹下的所有文件, 即使是文件也会列举出当前这条
+     *
+     * @param file 文件夹
+     * @return 若为文件夹，返回所有文件Array，否则返回空Array
+     */
+    public static List<File> listFiles(File file) {
+        List<File> files = new ArrayList<>();
+        if (isFile(file)){
+            files.add(file);
+            return files;
+        }
+
         if (isDir(file)) {
-            files = file.listFiles();
+            files = Arrays.asList(Objects.requireNonNull(file.listFiles()));
         }
         return files;
     }
 
-    public static File[] listFiles(String path) {
+    /**
+     * 列举当前文件夹下的所有文件
+     *
+     * @param path 文件夹路径
+     * @return 若为文件夹，返回所有文件Array，否则返回空Array
+     */
+    public static List<File> listFiles(String path) {
         return listFiles(new File(path));
     }
 
-    // isDir
+    /**
+     * 判断是否文件夹
+     *
+     * @param path 文件夹路径
+     * @return 若为文件夹返回True
+     */
     public static boolean isDir(String path) {
         return new File(path).isDirectory();
     }
 
+    /**
+     * 判断是否文件夹
+     *
+     * @param file 文件夹
+     * @return 若为文件夹返回True
+     */
     public static boolean isDir(File file) {
         return file.isDirectory();
     }
 
+    /**
+     * 判断是否文件
+     *
+     * @param path 文件夹路径
+     * @return 若为文件返回True
+     */
     public static boolean isFile(String path) {
         return new File(path).isFile();
     }
 
+    /**
+     * 判断是否文件
+     *
+     * @param file 文件
+     * @return 若为文件返回True
+     */
     public static boolean isFile(File file) {
         return file.isFile();
     }
 
-    // exists
+    /**
+     * 判断文件或文件夹是否存在
+     *
+     * @param file 文件
+     * @return 若存在返回True
+     */
     public static boolean exists(File file) {
         return file.exists();
     }
 
+    /**
+     * 判断文件或文件夹是否存在
+     *
+     * @param path 文件路径
+     * @return 若存在返回True
+     */
     public static boolean exists(String path) {
         return exists(new File(path));
     }
 
+    /**
+     * 删除文件或文件夹
+     *
+     * @param path 文件路径
+     * @return 成功删除返回True
+     */
     public static boolean delete(String path) {
         return delete(new File(path));
     }
 
+    /**
+     * 删除文件或文件夹
+     *
+     * @param file 文件
+     * @return 成功删除返回True
+     */
     public static boolean delete(File file) {
         return file.delete();
     }
 
-    public static boolean renameTo(String path1, String path2) {
-        File file1 = new File(path1);
-        File file2 = new File(path2);
+    /**
+     * 重命名文件或文件夹
+     *
+     * @param srcPath 原名
+     * @param dstPath 新名
+     * @return 成功重命名返回True
+     */
+    public static boolean renameTo(String srcPath, String dstPath) {
+        File file1 = new File(srcPath);
+        File file2 = new File(dstPath);
         return file1.renameTo(file2);
     }
 
-    public static boolean renameTo(File file1, File file2) {
-        return file2.renameTo(file2);
+    /**
+     * 重命名文件或文件夹
+     *
+     * @param srcFile 原名
+     * @param dstFile 新名
+     * @return 成功重命名返回True
+     */
+    public static boolean renameTo(File srcFile, File dstFile) {
+        return srcFile.renameTo(dstFile);
     }
 
+    /**
+     * 创建文件夹
+     *
+     * @param path 文件夹
+     * @return 成功创建返回True
+     */
     public static boolean mkdir(String path) {
         return new File(path).mkdir();
     }
 
+    /**
+     * 创建文件夹
+     *
+     * @param file 文件夹
+     * @return 成功创建返回True
+     */
     public static boolean mkdir(File file) {
         return file.mkdir();
     }
 
+    /**
+     * 递归创建文件夹
+     *
+     * @param path 文件夹
+     * @return 成功创建返回True
+     */
     public static boolean mkdirs(String path) {
         return new File(path).mkdirs();
     }
 
+    /**
+     * 递归创建文件夹
+     *
+     * @param file 文件夹
+     * @return 成功创建返回True
+     */
     public static boolean mkdirs(File file) {
         return file.mkdirs();
     }
 
-    // 复制文件
-    public static void copy(String srcPath, String dstPath) throws IOException {
-        InputStream in = new FileInputStream(srcPath);
-        OutputStream out = new FileOutputStream(dstPath);
-        byte[] date = new byte[512];
-        while (in.read(date) > 0) {
-            out.write(date);
-        }
-        in.close();
-        out.close();
+    /**
+     * 复制文件
+     *
+     * @param srcFile 原文件
+     * @param dstFile 新文件
+     */
+    public static void copyFile(File srcFile, File dstFile) throws IOException {
+        Files.copy(srcFile.toPath(), dstFile.toPath());
+    }
+
+    /**
+     * 复制文件
+     *
+     * @param srcPath 原路径
+     * @param dstPath 新路径
+     */
+    public static void copyFile(String srcPath, String dstPath) throws IOException {
+        copyFile(new File(srcPath), new File(dstPath));
+    }
+
+    /**
+     * 复制文件夹
+     *
+     * @param srcFile 原文件夹
+     * @param dstFile 新文件夹
+     */
+    public static void copyDir(File srcFile, File dstFile) throws IOException {
+        FileUtils.copyDirectory(srcFile, dstFile);
+    }
+
+    /**
+     * 复制文件夹
+     *
+     * @param srcPath 原路径
+     * @param dstPath 新路径
+     */
+    public static void copyDir(String srcPath, String dstPath) throws IOException {
+        FileUtils.copyDirectory(new File(srcPath), new File(dstPath));
+    }
+
+
+    /**
+     * 移动文件夹
+     *
+     * @param srcFile 原文件夹
+     * @param dstFile 新文件夹
+     */
+    public static void moveDir(File srcFile, File dstFile) throws IOException {
+        FileUtils.moveDirectory(srcFile, dstFile);
+    }
+
+    /**
+     * 移动文件夹
+     *
+     * @param srcPath 原路径
+     * @param dstPath 新路径
+     */
+    public static void moveDir(String srcPath, String dstPath) throws IOException {
+        FileUtils.moveDirectory(new File(srcPath), new File(dstPath));
+    }
+
+    /**
+     * 获取文件夹名
+     *
+     * @param file 文件或文件夹路径
+     * @return 文件或文件夹名, 若为文件带后缀
+     */
+    public static String getName(File file) {
+        return file.getName();
+    }
+
+    /**
+     * 获取文件夹名
+     *
+     * @param path 文件或文件夹路径
+     * @return 文件或文件夹名, 若为文件带后缀
+     */
+    public static String getName(String path) {
+        return getName(new File(path));
+    }
+
+
+    /**
+     * 获取文件夹名, 且不带后缀
+     *
+     * @param file 文件或文件夹
+     * @return 文件或文件夹名, 若为文件不带后缀
+     */
+    public static String getNameWithOutType(File file) {
+        return getName(file).replaceAll("\\.[a-zA-Z]+?$", "");
+    }
+
+    /**
+     * 获取文件夹名, 且不带后缀
+     *
+     * @param path 文件或文件夹路径
+     * @return 文件或文件夹名, 若为文件不带后缀
+     */
+    public static String getNameWithOutType(String path) {
+        return getNameWithOutType(new File(path));
     }
 }

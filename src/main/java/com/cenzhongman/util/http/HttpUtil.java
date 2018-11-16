@@ -286,16 +286,16 @@ public class HttpUtil {
     /**
      * 下载文件或图片
      *
-     * @param urlString
+     * @param urlString 下载链接
      */
-    public static void download(String urlString, String imageName) {
+    public static void download(String urlString, String file) {
         URL url;
 
         try {
             url = new URL(urlString);
             DataInputStream dataInputStream = new DataInputStream(url.openStream());
 
-            FileOutputStream fileOutputStream = new FileOutputStream(new File(imageName));
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(file));
             ByteArrayOutputStream output = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[1024];
