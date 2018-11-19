@@ -34,6 +34,8 @@ class DateTimeUtilTest {
         System.out.println(DateTimeUtil.toDate("October 25,"));
         System.out.println(DateTimeUtil.toDate("10月22日,"));
 
+        // 沒有日的
+        System.out.println(DateTimeUtil.toDate("2018-01"));
     }
 
     @Test

@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -125,6 +126,12 @@ public class FileUtil {
                 stringBuilder.append((char) value);
             }
         } catch (IOException ignored) {
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return stringBuilder.toString();
     }
@@ -212,20 +219,40 @@ public class FileUtil {
      * @param content 内容
      * @param charset 编码
      */
-    public static void write(String path, String content, Charset charset, Boolean appEnd) throws FileNotFoundException {
+    public static void write(String path, String content, Charset charset, Boolean appEnd) {
         // 文件夹不存在时创建文件夹，然后再写
         String dirPath = path.replaceAll("[^/\\\\]+$", "");
         if (!exists(dirPath)) {
             if (mkdirs(dirPath)) {
-                write(new FileOutputStream(new File(path), appEnd), content, charset);
+                try {
+                    write(new FileOutputStream(new File(path), appEnd), content, charset);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             } else {
                 logger.error("Make dir fail!");
             }
         } else {
             // 文件夹存在直接写
-            write(new FileOutputStream(new File(path), appEnd), content, charset);
+            try {
+                write(new FileOutputStream(new File(path), appEnd), content, charset);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
+    }
+
+
+    /**
+     * 写入文件
+     *
+     * @param file    写出的文件，若不存在则自动创建
+     * @param content 内容
+     * @param charset 编码
+     */
+    public static void write(File file, String content, Charset charset, Boolean appEnd) {
+        write(file.getAbsolutePath(), content, charset, appEnd);
     }
 
     /**
@@ -235,8 +262,29 @@ public class FileUtil {
      * @param content 内容
      * @param charset 编码
      */
-    public static void write(String path, String content, Charset charset) throws FileNotFoundException {
+    public static void write(String path, String content, Charset charset) {
         write(path, content, charset, false);
+    }
+
+    /**
+     * 写入文件
+     *
+     * @param file    写出的文件，若不存在则自动创建
+     * @param content 内容
+     * @param charset 编码
+     */
+    public static void write(File file, String content, Charset charset) {
+        write(file.getAbsolutePath(), content, charset);
+    }
+
+    /**
+     * 写入文件
+     *
+     * @param file    写出的文件，若不存在则自动创建
+     * @param content 内容
+     */
+    public static void write(File file, String content) {
+        write(file, content, StandardCharsets.UTF_8, false);
     }
 
     /**
@@ -245,23 +293,18 @@ public class FileUtil {
      * @param path    写出的路径，若不存在则自动创建
      * @param content 内容
      */
-    public static void write(String path, String content) throws FileNotFoundException {
+    public static void write(String path, String content) {
         write(path, content, StandardCharsets.UTF_8, false);
     }
 
     /**
-     * 列举当前文件夹下的所有文件, 即使是文件也会列举出当前这条
+     * 列举当前文件夹下的所有文件
      *
      * @param file 文件夹
      * @return 若为文件夹，返回所有文件Array，否则返回空Array
      */
     public static List<File> listFiles(File file) {
         List<File> files = new ArrayList<>();
-        if (isFile(file)){
-            files.add(file);
-            return files;
-        }
-
         if (isDir(file)) {
             files = Arrays.asList(Objects.requireNonNull(file.listFiles()));
         }
@@ -350,11 +393,17 @@ public class FileUtil {
 
     /**
      * 删除文件或文件夹
+     * 递归实现
      *
      * @param file 文件
      * @return 成功删除返回True
      */
     public static boolean delete(File file) {
+        if (isDir(file)) {
+            for (File file1 : listFiles(file)) {
+                delete(file1);
+            }
+        }
         return file.delete();
     }
 
@@ -429,7 +478,7 @@ public class FileUtil {
      * @param dstFile 新文件
      */
     public static void copyFile(File srcFile, File dstFile) throws IOException {
-        Files.copy(srcFile.toPath(), dstFile.toPath());
+        Files.copy(srcFile.toPath(), dstFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**

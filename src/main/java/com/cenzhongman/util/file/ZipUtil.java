@@ -20,8 +20,6 @@ public class ZipUtil {
      */
     private static final int BUFFER = 512;
 
-
-
     /**
      * 解压缩方法
      *
@@ -32,30 +30,34 @@ public class ZipUtil {
     public static boolean unzip(String zipFileName, String dstPath) {
         try {
             ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFileName));
-            ZipEntry zipEntry = null;
-            byte[] buffer = new byte[BUFFER];//缓冲器
-            int readLength = 0;//每次读出来的长度
+            ZipEntry zipEntry;
+            // 缓冲器
+            byte[] buffer = new byte[BUFFER];
+            // 每次读出来的长度
+            int readLength;
 
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
-                if (zipEntry.isDirectory()) {//若是zip条目目录，则需创建这个目录
+                // 若是zip条目目录，则需创建这个目录
+                if (zipEntry.isDirectory()) {
                     File dir = new File(dstPath + "/" + zipEntry.getName());
 
                     if (!dir.exists()) {
                         dir.mkdirs();
-                        continue;//跳出
+                        continue;
                     }
                 }
 
-                File file = createFile(dstPath, zipEntry.getName());//若是文件，则需创建该文件
+                // 若是文件，则需创建该文件
+                File file = createFile(dstPath, zipEntry.getName());
 
                 OutputStream outputStream = new FileOutputStream(file);
 
                 while ((readLength = zipInputStream.read(buffer, 0, BUFFER)) != -1) {
                     outputStream.write(buffer, 0, readLength);
                 }
-
                 outputStream.close();
-            }    // end while
+            }
+            zipInputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return false;
@@ -78,12 +80,12 @@ public class ZipUtil {
         File srcFile = new File(srcPath);
         List<File> fileList = getAllFiles(srcFile);
         byte[] buffer = new byte[BUFFER];
-        ZipEntry zipEntry = null;
+        ZipEntry zipEntry;
         int readLength;
 
+        ZipOutputStream zipOutputStream = null;
         try {
-            ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
-
+            zipOutputStream = new ZipOutputStream(new FileOutputStream(zipFileName));
             for (File file : fileList) {
                 if (file.isFile()) {
                     //若是文件，则压缩这个文件
@@ -104,14 +106,21 @@ public class ZipUtil {
                     zipEntry = new ZipEntry(getRelativePath(srcPath, file) + "/");
                     zipOutputStream.putNextEntry(zipEntry);
                 }
-            }    // end for
-            zipOutputStream.close();
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return false;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                if (zipOutputStream != null) {
+                    zipOutputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return true;
     }
@@ -186,21 +195,23 @@ public class ZipUtil {
      * @return 解压缩目标文件
      */
     private static File createFile(String dstPath, String fileName) {
-        String[] dirs = fileName.split("/");//将文件名的各级目录分解
+        // 将文件名的各级目录分解
+        String[] dirs = fileName.split("/");
         File file = new File(dstPath);
 
         if (dirs.length > 1) {
             //文件有上级目录
             for (int i = 0; i < dirs.length - 1; i++) {
-                file = new File(file, dirs[i]);//依次创建文件对象知道文件的上一级目录
+                // 依次创建文件对象知道文件的上一级目录
+                file = new File(file, dirs[i]);
             }
 
             if (!file.exists()) {
                 // 文件对应目录若不存在，则创建
                 file.mkdirs();
             }
-
-            file = new File(file, dirs[dirs.length - 1]);//创建文件
+            // 创建文件
+            file = new File(file, dirs[dirs.length - 1]);
 
             return file;
         } else {
@@ -208,8 +219,8 @@ public class ZipUtil {
                 // 若目标路径的目录不存在，则创建
                 file.mkdirs();
             }
-
-            file = new File(file, dirs[0]);//创建文件
+            // 创建文件
+            file = new File(file, dirs[0]);
 
             return file;
         }

@@ -230,8 +230,30 @@ public class DateTimeUtil {
             rstMap.put("source", rstSource);
             return rstMap;
         }
-        throw new ParseException("Can not find Date String!" + dateStr, 0);
 
+        String re7 = "\\d{4}-\\d{2}";
+        if (RegexUtil.isMatch(dateStr,re7)){
+            String dateStr1 = RegexUtil.extractFirst(dateStr, re7);
+            rstSource = dateStr1;
+            dateStr1 = dateStr1 + "-01";
+            rstDate = toDate(dateStr1);
+            rstMap.put("date", rstDate);
+            rstMap.put("source", rstSource);
+            return rstMap;
+        }
+
+        String re8 = "[1,2]\\d{3}(?!\\d)";
+        if (RegexUtil.isMatch(dateStr,re8)){
+            String dateStr1 = RegexUtil.extractFirst(dateStr, re8);
+            rstSource = dateStr1;
+            dateStr1 = dateStr1 + "-01-01";
+            rstDate = toDate(dateStr1);
+            rstMap.put("date", rstDate);
+            rstMap.put("source", rstSource);
+            return rstMap;
+        }
+
+        throw new ParseException("Can not find Date String!" + dateStr, 0);
     }
 
 

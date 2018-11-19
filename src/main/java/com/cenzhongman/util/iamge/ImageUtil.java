@@ -1,6 +1,7 @@
 package com.cenzhongman.util.iamge;
 
 
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
@@ -87,9 +88,9 @@ public class ImageUtil {
      * <p>Title: cutImage</p>
      * <p>Description:  根据原图与裁切size截取局部图片</p>
      *
-     * @param srcImg 源图片
-     * @param output 图片输出流
-     * @param x,y,w,h   需要截取部分的坐标和大小
+     * @param srcImg  源图片
+     * @param output  图片输出流
+     * @param x,y,w,h 需要截取部分的坐标和大小
      */
     public static void cutImage(File srcImg, OutputStream output, int x, int y, int w, int h) {
         cutImage(srcImg, output, new java.awt.Rectangle(x, y, w, h));
@@ -99,9 +100,9 @@ public class ImageUtil {
      * <p>Title: cutImage</p>
      * <p>Description:  根据原图与裁切size截取局部图片</p>
      *
-     * @param srcImg 源图片
+     * @param srcImg      源图片
      * @param destImgPath 图片输出路径
-     * @param rect   需要截取部分的坐标和大小
+     * @param rect        需要截取部分的坐标和大小
      */
     public static void cutImage(File srcImg, String destImgPath, java.awt.Rectangle rect) {
         File destImg = new File(destImgPath);
@@ -137,9 +138,9 @@ public class ImageUtil {
      * <p>Title: cutImage</p>
      * <p>Description:  根据原图与裁切size截取局部图片</p>
      *
-     * @param srcImg 源图片
+     * @param srcImg      源图片
      * @param destImgPath 图片输出路径
-     * @param x,y,w,h   需要截取部分的坐标和大小
+     * @param x,y,w,h     需要截取部分的坐标和大小
      */
     public static void cutImage(File srcImg, String destImgPath, int x, int y, int w, int h) {
         cutImage(srcImg, destImgPath, new java.awt.Rectangle(x, y, w, h));
@@ -153,14 +154,13 @@ public class ImageUtil {
      * <p>Title: thumbnailImage</p>
      * <p>Description: 根据图片路径生成缩略图 </p>
      *
-     * @param srcImg  原图片路径
-     * @param output  图片输出流
-     * @param w       缩略图宽
-     * @param h       缩略图高
-     * @param prevfix 生成缩略图的前缀
-     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     * @param srcImg 原图片路径
+     * @param output 图片输出流
+     * @param w      缩略图宽
+     * @param h      缩略图高
+     * @param force  是否拉伸
      */
-    public static void thumbnailImage(File srcImg, OutputStream output, int w, int h, String prevfix, boolean force) {
+    public static void thumbnailImage(File srcImg, OutputStream output, int w, int h, boolean force) {
         if (srcImg.exists()) {
             try {
                 // ImageIO 支持的图片类型 : [BMP, bmp, jpg, JPG, wbmp, jpeg, png, PNG, JPEG, WBMP, GIF, gif]
@@ -174,24 +174,69 @@ public class ImageUtil {
                     logger.error("Sorry, the image suffix is illegal. the standard image suffix is {}." + types);
                     return;
                 }
-                Image img = ImageIO.read(srcImg);
-                // 根据原图与要求的缩略图比例，找到最合适的缩略图比例
+                BufferedImage img = ImageIO.read(srcImg);
+                //                BufferedImage img = Thumbnails.of(srcImg).size(w,h).asBufferedImage();
+
+                int width = img.getWidth(null);
+                int height = img.getHeight(null);
+
+                // todo 为了解决白底问题，但是目前没有解决
+                BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+                //                Graphics2D g2d = image.createGraphics();
+                //                g2d.getDeviceConfiguration().createCompatibleImage(width,
+                //                        height, Transparency.TRANSLUCENT);
+                //                // 从原图上取颜色绘制新图
+                //                g2d.drawImage(img, 0, 0, width, height, null);
+                //                g2d.dispose();
+                image.getGraphics().drawImage(img.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
+                //                ImageIO.write(image,suffix,output);
+
+                int startX = 0;
+                int startY = 0;
+                int endX = 0;
+                int endY = 0;
+                int newWeight = 0;
+                int newHeight = 0;
+                // 根据原图与要求的缩略图尺寸，找到最合适的缩略图比例
                 if (!force) {
-                    int width = img.getWidth(null);
-                    int height = img.getHeight(null);
                     if ((width * 1.0) / w < (height * 1.0) / h) {
-                        if (width > w) {
-                            h = Integer.parseInt(new java.text.DecimalFormat("0").format(height * w / (width * 1.0)));
-                        }
+                        // 原图比例更高
+                        newWeight = Integer.parseInt(new java.text.DecimalFormat("0").format((width * 1.0) * (h * 1.0 / height)));
+                        newHeight = h;
+                        startX = (w / 2) - (newWeight / 2);
+                        startY = 0;
                     } else {
-                        if (height > h) {
-                            w = Integer.parseInt(new java.text.DecimalFormat("0").format(width * h / (height * 1.0)));
-                        }
+                        // 原图比例更宽
+                        newWeight = w;
+                        newHeight = Integer.parseInt(new java.text.DecimalFormat("0").format((height * 1.0) * (w * 1.0 / width)));
+                        startX = 0;
+                        startY = (h / 2) - (newHeight / 2);
                     }
                 }
-                BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+
+                BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics g = bi.getGraphics();
-                g.drawImage(img, 0, 0, w, h, Color.LIGHT_GRAY, null);
+                /* 参数说明
+                           (0,0)|-----------------|
+                                |原图(img)         |
+                                |                 |
+                                |                 |
+                                |-----------------|(width, height)
+
+
+                                -------------------
+                                |画板              |
+                (startX,startY) |-----------------|
+                                |原图              |
+                                |                 |
+                                |                 |
+                                |-----------------|(endX,endY)
+                                |                 |
+                                -------------------
+                */
+                //                g.drawImage(img, startX, startY, endX, endY, 0, 0, width, height, new Color(255, 255, 255, 255), null);
+                g.drawImage(img.getScaledInstance(width, height, Image.SCALE_SMOOTH), startX, startY, newWeight, newHeight, null);
                 g.dispose();
                 // 将图片保存在原目录并加上前缀
                 ImageIO.write(bi, suffix, output);
@@ -212,7 +257,7 @@ public class ImageUtil {
      * @param w       缩略图宽
      * @param h       缩略图高
      * @param prevfix 生成缩略图的前缀
-     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     * @param force   是否拉伸
      */
     public static void thumbnailImage(File srcImg, int w, int h, String prevfix, boolean force) {
         String p = srcImg.getAbsolutePath();
@@ -223,7 +268,7 @@ public class ImageUtil {
             if (!p.endsWith(File.separator)) {
                 p = p + File.separator;
             }
-            thumbnailImage(srcImg, new java.io.FileOutputStream(p + prevfix + srcImg.getName()), w, h, prevfix, force);
+            thumbnailImage(srcImg, new java.io.FileOutputStream(p + prevfix + srcImg.getName()), w, h, force);
         } catch (FileNotFoundException e) {
             logger.error("the dest image is not exist.", e);
         }
@@ -233,11 +278,11 @@ public class ImageUtil {
      * <p>Title: thumbnailImage</p>
      * <p>Description: 根据图片路径生成缩略图 </p>
      *
-     * @param imagePath  原图片路径
-     * @param w       缩略图宽
-     * @param h       缩略图高
-     * @param prevfix 生成缩略图的前缀
-     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     * @param imagePath 原图片路径
+     * @param w         缩略图宽
+     * @param h         缩略图高
+     * @param prevfix   生成缩略图的前缀
+     * @param force     是否拉伸
      */
     public static void thumbnailImage(String imagePath, int w, int h, String prevfix, boolean force) {
         File srcImg = new File(imagePath);
@@ -248,24 +293,53 @@ public class ImageUtil {
      * <p>Title: thumbnailImage</p>
      * <p>Description: 根据图片路径生成缩略图 </p>
      *
-     * @param imagePath  原图片路径
-     * @param w       缩略图宽
-     * @param h       缩略图高
-     * @param force   是否强制按照宽高生成缩略图(如果为false，则生成最佳比例缩略图)
+     * @param imagePath 原图片路径
+     * @param w         缩略图宽
+     * @param h         缩略图高
+     * @param force     是否拉伸
      */
     public static void thumbnailImage(String imagePath, int w, int h, boolean force) {
-        thumbnailImage(imagePath, w, h, DEFAULT_THUMB_PREVFIX, DEFAULT_FORCE);
+        thumbnailImage(imagePath, w, h, DEFAULT_THUMB_PREVFIX, force);
     }
 
     /**
      * <p>Title: thumbnailImage</p>
      * <p>Description: 根据图片路径生成缩略图 </p>
      *
-     * @param imagePath  原图片路径
-     * @param w       缩略图宽
-     * @param h       缩略图高
+     * @param imagePath 原图片路径
+     * @param w         缩略图宽
+     * @param h         缩略图高
      */
     public static void thumbnailImage(String imagePath, int w, int h) {
         thumbnailImage(imagePath, w, h, DEFAULT_FORCE);
+    }
+
+    /**
+     * <p>Title: thumbnailImage</p>
+     * <p>Description: 根据图片路径生成缩略图 </p>
+     *
+     * @param imagePath 原图片路径
+     * @param w         缩略图宽
+     * @param h         缩略图高
+     */
+    public static void thumbnailImage(String imagePath, String savePath, int w, int h) {
+        try {
+            thumbnailImage(new File(imagePath), new FileOutputStream(savePath), w, h, DEFAULT_FORCE);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void thumbnail(String imagePath, String savePath, int w, int h) {
+        try {
+            Thumbnails.of(imagePath)
+                    //                    .keepAspectRatio(false)
+                    //                    .size(w,h)
+                    .forceSize(w, h)
+                    //                    .outputQuality(1f)
+                    .toFile(savePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

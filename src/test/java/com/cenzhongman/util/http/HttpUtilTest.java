@@ -62,4 +62,12 @@ class HttpUtilTest {
 
         // Json Post
     }
+
+    @Test
+    void download(){
+        HttpUtil.download("https://www.baidu.com/img/bd_logo1.png","/home/czm/","1.png");
+//        HttpUtil.download("https://ss2.baidu.com/6ONYsjip0QIZ8tyhnq/it/u=779276183,2759448786&fm=173&app=49&f=JPEG?w=400&h=400&s=9808EE164143F2EC182712670300B06A","/home/czm/","1.png");
+        HttpUtil.download("https://github.com/cenzhongman/utils/archive/master.zip","/home/czm/","1.zip");
+        HttpUtil.download("https://github.com/cenzhongman/utils/archive/master.zip","/home/czm/");
+    }
 }
