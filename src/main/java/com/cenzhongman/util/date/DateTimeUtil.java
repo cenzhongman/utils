@@ -102,6 +102,10 @@ public class DateTimeUtil {
      * @throws ParseException 解析异常
      */
     public static Map<String, Object> toDateWithSource(String dateStr) throws ParseException {
+        if ("".equals(dateStr)){
+            throw new ParseException("参数为空",0);
+        }
+
         Map<String, Object> rstMap = new HashMap<>();
         Date rstDate = null;
         String rstSource = null;
