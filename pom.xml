@@ -63,7 +63,7 @@
             <version>0.4.8</version>
         </dependency>
 
-        <!-- gson -->
+        <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
