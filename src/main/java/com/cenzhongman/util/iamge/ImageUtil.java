@@ -24,8 +24,17 @@ import java.util.Arrays;
 public class ImageUtil {
     private static Logger logger = Logger.getLogger(ImageUtil.class);
 
+    /**
+     * 默认缩略图前缀
+     */
     private static String DEFAULT_THUMB_PREVFIX = "thumb_";
+    /**
+     * 默认切图前缀
+     */
     private static String DEFAULT_CUT_PREVFIX = "cut_";
+    /**
+     * 默认不拉伸
+     */
     private static Boolean DEFAULT_FORCE = false;
 
 
@@ -175,21 +184,12 @@ public class ImageUtil {
                     return;
                 }
                 BufferedImage img = ImageIO.read(srcImg);
-                //                BufferedImage img = Thumbnails.of(srcImg).size(w,h).asBufferedImage();
 
                 int width = img.getWidth(null);
                 int height = img.getHeight(null);
 
-                // todo 为了解决白底问题，但是目前没有解决
                 BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-                //                Graphics2D g2d = image.createGraphics();
-                //                g2d.getDeviceConfiguration().createCompatibleImage(width,
-                //                        height, Transparency.TRANSLUCENT);
-                //                // 从原图上取颜色绘制新图
-                //                g2d.drawImage(img, 0, 0, width, height, null);
-                //                g2d.dispose();
                 image.getGraphics().drawImage(img.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null);
-                //                ImageIO.write(image,suffix,output);
 
                 int startX = 0;
                 int startY = 0;
@@ -218,24 +218,16 @@ public class ImageUtil {
                 BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_4BYTE_ABGR);
                 Graphics g = bi.getGraphics();
                 /* 参数说明
-                           (0,0)|-----------------|
-                                |原图(img)         |
-                                |                 |
-                                |                 |
-                                |-----------------|(width, height)
-
-
                                 -------------------
                                 |画板              |
                 (startX,startY) |-----------------|
                                 |原图              |
+                                |                 |(newHeight)
                                 |                 |
-                                |                 |
-                                |-----------------|(endX,endY)
+                                |-----newWidth----|(endX,endY)
                                 |                 |
                                 -------------------
                 */
-                //                g.drawImage(img, startX, startY, endX, endY, 0, 0, width, height, new Color(255, 255, 255, 255), null);
                 g.drawImage(img.getScaledInstance(width, height, Image.SCALE_SMOOTH), startX, startY, newWeight, newHeight, null);
                 g.dispose();
                 // 将图片保存在原目录并加上前缀
