@@ -129,7 +129,7 @@ public class HttpUtil {
             }
 
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         } finally {
             // 关闭资源
             if (null != response) {
