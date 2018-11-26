@@ -199,18 +199,6 @@ public class DateTimeUtil {
             return rstMap;
         }
 
-        // 12 Jan
-        String re4 = "(\\d{1,2})\\D+(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)";
-        if (RegexUtil.isMatch(dateStr, re4)) {
-            String dateStr1 = RegexUtil.extractFirst(dateStr, re4);
-            rstSource = dateStr1;
-            dateStr1 = dateStr1 + " " + 2018;
-            rstDate = toDate(dateStr1);
-            rstMap.put("date", rstDate);
-            rstMap.put("source", rstSource);
-            return rstMap;
-        }
-
         // Jan 1
         String re5 = "(Jan|January|Feb|February|Mar|March|Apr|April|May|Jun|June|Jul|July|Aug|August|Sept|September|Oct|October|Nov|November|Dec|December)\\D+(\\d{1,2})";
         if (RegexUtil.isMatch(dateStr, re5)) {
