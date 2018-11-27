@@ -54,4 +54,9 @@ public class FileUtilTest {
     void delete(){
         System.out.println(FileUtil.delete("C:\\home\\czm\\data\\bmwData\\急啊急啊就\\"));
     }
+
+    @Test
+    void getType(){
+        System.out.println(FileUtil.getType("asdasda./asd/asd/asd/asd.pdf"));
+    }
 }

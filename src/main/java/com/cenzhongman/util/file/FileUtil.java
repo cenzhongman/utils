@@ -1,5 +1,6 @@
 package com.cenzhongman.util.file;
 
+import com.cenzhongman.util.RegexUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -572,4 +573,13 @@ public class FileUtil {
     public static String getNameWithOutType(String path) {
         return getNameWithOutType(new File(path));
     }
+
+    /**
+     * 获取文件类型
+     */
+    public static String getType(String path) {
+        return RegexUtil.extractFirst(path,"\\.[a-zA-Z]+?$");
+    }
+
+
 }
