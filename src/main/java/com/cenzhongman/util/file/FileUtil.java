@@ -479,6 +479,9 @@ public class FileUtil {
      * @param dstFile 新文件
      */
     public static void copyFile(File srcFile, File dstFile) throws IOException {
+        if (!exists(dstFile.getParent())) {
+            mkdirs(dstFile.getParent());
+        }
         Files.copy(srcFile.toPath(), dstFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -550,6 +553,9 @@ public class FileUtil {
      * @return 文件或文件夹名, 若为文件带后缀
      */
     public static String getName(String path) {
+        if (path.isEmpty()) {
+            return "";
+        }
         return getName(new File(path));
     }
 
@@ -578,7 +584,7 @@ public class FileUtil {
      * 获取文件类型
      */
     public static String getType(String path) {
-        return RegexUtil.extractFirst(path,"\\.[a-zA-Z]+?$");
+        return RegexUtil.extractFirst(path, "\\.[a-zA-Z]+?$");
     }
 
 

@@ -47,6 +47,25 @@ public class RegexUtil {
     }
 
     /**
+     * 获取匹配到的第i个
+     *
+     * @param str 需要匹配的字符串
+     * @param regex 正则表达式
+     * @param index 正则表达式的参数的index
+     * @return 匹配的第一结果，未匹配到返回null
+     */
+    public static String extract(String str, String regex, int index) {
+        String matchString = "";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+
+        while (matcher.find()) {
+            matchString = matcher.group(index);
+        }
+        return matchString;
+    }
+
+    /**
      * 规则检查，是否符合XX规则
      *
      * @param str 需要匹配的字符串

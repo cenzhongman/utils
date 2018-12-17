@@ -1,9 +1,6 @@
 package com.cenzhongman.util;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author 岑忠满
@@ -19,8 +16,9 @@ class RegexUtilTest {
 
     @Test
     void extractFirst() {
-        System.out.println(RegexUtil.extractFirst("新华社消息，小米的CEO雷军，这些年", "[^，|。]+[CEO|董事长][^，|^。]+"));
-        System.out.println(RegexUtil.extractFirst("新华社消息，小米的CEO雷军，这些年", "a"));
+//        System.out.println(RegexUtil.extract("新华社消息，小米的CEO雷军，这些年", "[^，|。]+[CEO|董事长][^，|^。]+"));
+//        System.out.println(RegexUtil.extract("新华社消息，小米的CEO雷军，这些年", "a"));
+        System.out.println(RegexUtil.extract("新华社消息，小米的CEO雷军，这些年", "(小米的)(CEO)",2));
     }
 
     @Test
