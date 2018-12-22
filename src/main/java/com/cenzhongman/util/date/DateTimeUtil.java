@@ -285,6 +285,6 @@ public class DateTimeUtil {
     }
 
     public static String getTimestamp(){
-        return String.valueOf((System.currentTimeMillis() / 1000));
+        return String.valueOf((System.currentTimeMillis()));
     }
 }
