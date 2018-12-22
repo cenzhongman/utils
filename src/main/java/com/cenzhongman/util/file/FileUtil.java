@@ -587,5 +587,21 @@ public class FileUtil {
         return RegexUtil.extractFirst(path, "\\.[a-zA-Z]+?$");
     }
 
+    /**
+     * 获取文件的大小
+     * @param file 文件
+     */
+    public static long getFileSize(File file) {
+        if (file.exists() && file.isFile()) {
+           return file.length();
+        }return 0;
+    }
 
+    /**
+     * 判断文件是否有内容
+     * @param file 文件
+     */
+    public static boolean isEmpty(File file) {
+        return getFileSize(file)<0;
+    }
 }

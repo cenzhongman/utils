@@ -18,10 +18,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -292,9 +289,18 @@ public class HttpUtil {
      * 下载文件或图片，使用文件自身的文件名
      *
      * @param urlString    下载链接
+     */
+    public static void download(String urlString, File downloadFile) throws IOException {
+        download(urlString, downloadFile.getParent(), downloadFile.getName());
+    }
+
+    /**
+     * 下载文件或图片，使用文件自身的文件名
+     *
+     * @param urlString    下载链接
      * @param downloadPath 下载路径
      */
-    public static void download(String urlString, String downloadPath) {
+    public static void download(String urlString, String downloadPath) throws IOException {
         download(urlString, downloadPath, "");
     }
 
@@ -305,18 +311,18 @@ public class HttpUtil {
      * @param downloadPath 下载路径
      * @param saveName     保存的文件名
      */
-    public static void download(String urlString, String downloadPath, String saveName) {
+    public static void download(String urlString, String downloadPath, String saveName) throws IOException {
         URL url;
         String fileName;
         String savePath;
 
         // 若下载文件夹不存在创建文件夹
-        if (!FileUtil.exists(downloadPath)){
+        if (!FileUtil.exists(downloadPath)) {
             FileUtil.mkdirs(downloadPath);
         }
 
         // 文件名包含路径，抛出异常
-        if (saveName.contains("\\")|| saveName.contains("/")){
+        if (saveName.contains("\\") || saveName.contains("/")) {
             throw new IllegalArgumentException("名字不应包含路径");
         }
 
@@ -325,41 +331,37 @@ public class HttpUtil {
             downloadPath = downloadPath + separator;
         }
 
-        try {
-            url = new URL(urlString);
-            DataInputStream dataInputStream = new DataInputStream(url.openStream());
+        url = new URL(urlString);
+        DataInputStream dataInputStream = new DataInputStream(url.openStream());
 
-            URLConnection uc = url.openConnection();
+        URLConnection uc = url.openConnection();
 
-            // 下载名不存在，使用默认名字
-            if (saveName.equals("")) {
-                try{
-                    fileName = uc.getHeaderField("Content-Disposition");
-                    fileName = new String(fileName.getBytes(StandardCharsets.ISO_8859_1), "GBK");
-                    fileName = URLDecoder.decode(fileName.substring(fileName.indexOf("filename=") + 9), "UTF-8");
-                }catch (NullPointerException e){
-                    fileName = urlString.replaceAll("^.*[/\\\\]","");
-                }
-                saveName = fileName;
+        // 下载名不存在，使用默认名字
+        if ("".equals(saveName)) {
+            try {
+                fileName = uc.getHeaderField("Content-Disposition");
+                fileName = new String(fileName.getBytes(StandardCharsets.ISO_8859_1), "GBK");
+                fileName = URLDecoder.decode(fileName.substring(fileName.indexOf("filename=") + 9), "UTF-8");
+            } catch (NullPointerException e) {
+                fileName = urlString.replaceAll("^.*[/\\\\]", "");
             }
-
-            savePath = downloadPath + saveName;
-
-            FileOutputStream fileOutputStream = new FileOutputStream(savePath);
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-            byte[] buffer = new byte[1024];
-            int length;
-
-            while ((length = dataInputStream.read(buffer)) > 0) {
-                output.write(buffer, 0, length);
-            }
-            byte[] context = output.toByteArray();
-            fileOutputStream.write(output.toByteArray());
-            dataInputStream.close();
-            fileOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            saveName = fileName;
         }
+
+        savePath = downloadPath + saveName;
+
+        FileOutputStream fileOutputStream = new FileOutputStream(savePath);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int length;
+
+        while ((length = dataInputStream.read(buffer)) > 0) {
+            output.write(buffer, 0, length);
+        }
+        byte[] context = output.toByteArray();
+        fileOutputStream.write(output.toByteArray());
+        dataInputStream.close();
+        fileOutputStream.close();
     }
 }
