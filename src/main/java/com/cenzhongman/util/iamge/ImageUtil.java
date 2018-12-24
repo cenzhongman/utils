@@ -1,6 +1,7 @@
 package com.cenzhongman.util.iamge;
 
 
+import com.cenzhongman.util.file.FileUtil;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.log4j.Logger;
 
@@ -169,7 +170,7 @@ public class ImageUtil {
      * @param h      缩略图高
      * @param force  是否拉伸
      */
-    public static void thumbnailImage(File srcImg, OutputStream output, int w, int h, boolean force) {
+    public static void thumbnailImage(File srcImg, OutputStream output, int w, int h, boolean force) throws FileNotFoundException {
         if (srcImg.exists()) {
             try {
                 // ImageIO 支持的图片类型 : [BMP, bmp, jpg, JPG, wbmp, jpeg, png, PNG, JPEG, WBMP, GIF, gif]
@@ -232,12 +233,22 @@ public class ImageUtil {
                 g.dispose();
                 // 将图片保存在原目录并加上前缀
                 ImageIO.write(bi, suffix, output);
-                output.close();
             } catch (IOException e) {
                 logger.error("generate thumbnail image failed.", e);
+            }finally {
+                try {
+                    output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
-            logger.warn("the src image is not exist.");
+            try {
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new FileNotFoundException(srcImg.getAbsolutePath());
         }
     }
 
@@ -314,12 +325,11 @@ public class ImageUtil {
      * @param w         缩略图宽
      * @param h         缩略图高
      */
-    public static void thumbnailImage(String imagePath, String savePath, int w, int h) {
-        try {
-            thumbnailImage(new File(imagePath), new FileOutputStream(savePath), w, h, DEFAULT_FORCE);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public static void thumbnailImage(String imagePath, String savePath, int w, int h) throws FileNotFoundException {
+        if (!FileUtil.exists(new File(savePath).getParent())){
+            FileUtil.mkdirs(new File(savePath).getParent());
         }
+        thumbnailImage(new File(imagePath), new FileOutputStream(savePath), w, h, DEFAULT_FORCE);
     }
 
     public static void thumbnail(String imagePath, String savePath, int w, int h) {

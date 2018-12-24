@@ -7,6 +7,9 @@ pipeline {
     }
     stages {
         stage('Build') {
+            when {
+                branch 'development'
+            }
             steps {
                 sh 'mvn -B -DskipTests clean install'
             }

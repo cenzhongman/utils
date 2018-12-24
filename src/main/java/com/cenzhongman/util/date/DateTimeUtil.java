@@ -283,4 +283,8 @@ public class DateTimeUtil {
         }
         return sb.toString();
     }
+
+    public static String getTimestamp(){
+        return String.valueOf((System.currentTimeMillis()));
+    }
 }

@@ -2,6 +2,8 @@ package com.cenzhongman.util.iamge;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,7 +21,7 @@ class ImageUtilTest {
     }
 
     @Test
-    void thumbnailImage() {
+    void thumbnailImage() throws FileNotFoundException {
         // 原图比例：50*100
         // 情况1 原图比例比较高，且需要放大
         ImageUtil.thumbnailImage(rootDir + "test.png", rootDir + "test1.png", 400, 200);
