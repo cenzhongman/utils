@@ -16,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.*;
@@ -32,6 +33,7 @@ import static java.io.File.separator;
  * @date 2018/9/25 14:02
  */
 public class HttpUtil {
+    private static Logger logger = Logger.getLogger(HttpUtil.class);
     private static final String DEFAULT_CHARSET = "UTF-8";
 
     public static String doGet(String url) {
@@ -76,6 +78,7 @@ public class HttpUtil {
                 e.printStackTrace();
             }
             url = sb.toString();
+            logger.info("Get:"+url);
         }
         return doGet(url, headers);
     }
@@ -98,11 +101,11 @@ public class HttpUtil {
 
         RequestConfig requestConfig = RequestConfig.custom()
                 // 连接主机服务超时时间
-                .setConnectTimeout(35000)
+                .setConnectTimeout(300000)
                 // 请求超时时间
-                .setConnectionRequestTimeout(35000)
+                .setConnectionRequestTimeout(300000)
                 // 数据读取超时时间
-                .setSocketTimeout(60000)
+                .setSocketTimeout(300000)
                 .setProxy(proxy)
                 .build();
 
