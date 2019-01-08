@@ -584,7 +584,7 @@ public class FileUtil {
      * 获取文件类型
      */
     public static String getType(String path) {
-        return RegexUtil.extractFirst(path, "\\.[a-zA-Z]+?$");
+        return RegexUtil.extractFirst(path, "\\.[a-zA-Z]+?$").replace(".","");
     }
 
     /**
